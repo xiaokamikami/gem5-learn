@@ -56,6 +56,8 @@ class L1Cache(Cache):
     response_latency = 2
     mshrs = 4
     tgts_per_mshr = 20
+    Mostly_exclusive = False
+    writeback_clean = True
 
 
 class L1_ICache(L1Cache):
@@ -76,6 +78,15 @@ class L2Cache(Cache):
     mshrs = 20
     tgts_per_mshr = 12
     write_buffers = 8
+
+
+class L3Cache(Cache):
+    assoc = 64
+    hit_latency = 32
+    response_latency = 32
+    mshrs = 32
+    tgts_per_mshr = 24
+    write_buffers = 16
 
 
 class IOCache(Cache):
