@@ -1017,7 +1017,9 @@ CommitCPUStats::CommitCPUStats(statistics::Group *parent, int thread_id)
     ADD_STAT(committedInstType, statistics::units::Count::get(),
             "Class of committed instruction."),
     ADD_STAT(committedControl, statistics::units::Count::get(),
-             "Class of control type instructions committed")
+             "Class of control type instructions committed"),
+    ADD_STAT(committedLoad, statistics::units::Count::get(),
+             "Class of Load type instructions committed")
 {
     numInsts
         .prereq(numInsts);
@@ -1039,6 +1041,14 @@ CommitCPUStats::CommitCPUStats(statistics::Group *parent, int thread_id)
 
     for (unsigned i = 0; i < StaticInstFlags::Flags::Num_Flags; i++) {
         committedControl.subname(i, StaticInstFlags::FlagsStrings[i]);
+    }
+
+    committedLoad
+        .init(StaticInstFlags::Flags::Num_Flags)
+        .flags(statistics::nozero);
+
+    for (unsigned i = 0; i < StaticInstFlags::Flags::Num_Flags; i++) {
+        committedLoad.subname(i, StaticInstFlags::FlagsStrings[i]);
     }
 }
 
@@ -1070,6 +1080,11 @@ CommitCPUStats::updateComCtrlStats(const StaticInstPtr staticInst)
         }
         committedControl[gem5::StaticInstFlags::Flags::IsControl]++;
     }
+
+    if (staticInst->isLoad()) {
+        committedLoad[gem5::StaticInstFlags::Flags::IsLoad]++;
+    }
+
 }
 
 } // namespace gem5

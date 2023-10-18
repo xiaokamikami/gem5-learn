@@ -30,6 +30,7 @@
 
 int main(int argc, char* argv[])
 {
-    printf("Hello world!\n");
+    char temp[] = "Hello MEM world !\n";
+    printf("%s",temp);
     return 0;
 }

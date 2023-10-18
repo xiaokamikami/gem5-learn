@@ -812,6 +812,9 @@ class BaseCPU : public ClockedObject
 
         /* number of control instructions committed by control inst type */
         statistics::Vector committedControl;
+
+        /* Number of instructions committed by type (load) */
+        statistics::Vector committedLoad;
         void updateComCtrlStats(const StaticInstPtr staticInst);
 
     };
