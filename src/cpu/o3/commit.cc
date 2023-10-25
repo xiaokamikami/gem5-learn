@@ -59,6 +59,8 @@
 #include "debug/Activity.hh"
 #include "debug/Commit.hh"
 #include "debug/CommitRate.hh"
+#include "debug/CommitLoad.hh"
+#include "debug/MemDepUnit.hh"
 #include "debug/Drain.hh"
 #include "debug/ExecFaulting.hh"
 #include "debug/HtmCpu.hh"
@@ -901,7 +903,7 @@ Commit::commit()
 
     }
 }
-
+uint64_t cycle_count = 0;
 void
 Commit::commitInsts()
 {
@@ -917,7 +919,7 @@ Commit::commitInsts()
     DPRINTF(Commit, "Trying to commit instructions in the ROB.\n");
 
     unsigned num_committed = 0;
-    unsigned num_loadcommitted = 0;
+   
     DynInstPtr head_inst;
 
 
@@ -982,11 +984,6 @@ Commit::commitInsts()
 
             // Try to commit the head instruction.
             bool commit_success = commitHead(head_inst, num_committed);
-
-            if (head_inst->isLoad()) {
-                num_loadcommitted++;
-                //DPRINTF(Commit, "num_loadcommitted %d\n",num_loadcommitted);   
-            }
 
             if (commit_success) {
                 ++num_committed;
@@ -1104,10 +1101,11 @@ Commit::commitInsts()
         }
     }
     
-
+    cycle_count++;
     //Print Load commint count 
     if (stats.numCommittedloads.total()!=0) {
-        cout << "number loads: "<< stats.numCommittedloads.total()<< "\n";
+        DPRINTF(CommitLoad,"Load commint :%d\n",stats.numCommittedloads.total());
+        //cout <<"Cycle " <<cycle_count << " : loads "<< stats.numCommittedloads.total()<< "\n";
         stats.numCommittedloads.reset();
     }
 

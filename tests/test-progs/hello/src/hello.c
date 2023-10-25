@@ -27,10 +27,13 @@
  */
 
 #include <stdio.h>
-
+#include <string.h>
 int main(int argc, char* argv[])
 {
-    char temp[] = "Hello MEM world !\n";
-    printf("%s",temp);
+    char temp[] = "Hello MEM world !";
+    char copy[sizeof(temp)];
+    memcpy(copy,temp,sizeof(temp));
+    int i = memcmp(copy,temp,sizeof(temp));
+    printf("%s == %s  reslut:%d \n",temp,copy , i);
     return 0;
 }

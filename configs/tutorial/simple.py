@@ -6,11 +6,12 @@ from cache import *
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--cpu_type", help="Cpu type")
-parser.add_option("--l1i_size", help="L1 instruction cache size")
-parser.add_option("--l1d_size", help="L1 data cache size")
-parser.add_option("--l2_size", help="Unified L2 cache size")
-parser.add_option("--l3_size", help="Unified L3 cache size")
+parser.add_option("--cpu_type"  , help="Cpu type")
+parser.add_option("--l1i_size"  , help="L1 instruction cache size")
+parser.add_option("--l1d_size"  , help="L1 data cache size")
+parser.add_option("--l2_size"   , help="Unified L2 cache size")
+parser.add_option("--l3_size"   , help="Unified L3 cache size")
+parser.add_option("--dump_cache", help="Print cache at the end")
 
 (options, args) = parser.parse_args()
 print("\033[34moptions %s ",options,"\n\033[0m")
@@ -84,8 +85,10 @@ root = Root(full_system=False, system=system)
 
 m5.instantiate()
 
-print("Beginning simulation!")
+print("\033[32mBeginning simulation!\033[0m\n")
 exit_event = m5.simulate()
 print(
-    "Exiting @ tick {} because {}".format(m5.curTick(), exit_event.getCause())
+    "\033[32m \nExiting @ tick {} because {}".format(m5.curTick(), exit_event.getCause(),"\033[0m")
 )
+
+
