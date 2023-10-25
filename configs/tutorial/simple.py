@@ -6,13 +6,14 @@ from cache import *
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--cpu-type", help="Cpu type")
+parser.add_option("--cpu_type", help="Cpu type")
 parser.add_option("--l1i_size", help="L1 instruction cache size")
 parser.add_option("--l1d_size", help="L1 data cache size")
 parser.add_option("--l2_size", help="Unified L2 cache size")
 parser.add_option("--l3_size", help="Unified L3 cache size")
 
 (options, args) = parser.parse_args()
+print("\033[34moptions %s ",options,"\n\033[0m")
 # init
 system = System()
 system.clk_domain = SrcClockDomain()
@@ -22,7 +23,13 @@ system.mem_mode = "timing"
 system.mem_ranges = [AddrRange("4096MB")]
 
 # create riscvCPU
-system.cpu = RiscvTimingSimpleCPU()
+if(options.cpu_type == "O3CPU") :
+    print("run o3")
+    system.cpu = RiscvO3CPU()
+else :
+    print("run simple")
+    system.cpu = RiscvTimingSimpleCPU()
+    
 # create L1cache
 system.cpu.icache = L1ICache(options)
 system.cpu.dcache = L1DCache(options)

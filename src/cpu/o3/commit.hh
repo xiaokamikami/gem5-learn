@@ -478,6 +478,8 @@ class Commit
         statistics::Scalar branchMispredicts;
         /** Distribution of the number of committed instructions each cycle. */
         statistics::Distribution numCommittedDist;
+        /** the number of committed loads cycle. */
+        statistics::Vector numCommittedloads;
 
         /** Stat for the total number of committed atomics. */
         statistics::Vector amos;
@@ -485,8 +487,11 @@ class Commit
         statistics::Vector membars;
         /** Total number of function calls */
         statistics::Vector functionCalls;
+
+
         /** Committed instructions by instruction type (OpClass) */
         statistics::Vector2d committedInstType;
+
 
         /** Number of cycles where the commit bandwidth limit is reached. */
         statistics::Scalar commitEligibleSamples;

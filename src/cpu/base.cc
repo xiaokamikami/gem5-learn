@@ -46,6 +46,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <algorithm>
+#include <cstdlib>
 
 #include "arch/generic/decoder.hh"
 #include "arch/generic/isa.hh"
@@ -72,7 +74,7 @@
 
 // Hack
 #include "sim/stat_control.hh"
-
+using namespace std;
 namespace gem5
 {
 
@@ -1047,9 +1049,11 @@ CommitCPUStats::CommitCPUStats(statistics::Group *parent, int thread_id)
         .init(StaticInstFlags::Flags::Num_Flags)
         .flags(statistics::nozero);
 
-    for (unsigned i = 0; i < StaticInstFlags::Flags::Num_Flags; i++) {
-        committedLoad.subname(i, StaticInstFlags::FlagsStrings[i]);
-    }
+    //for (unsigned i = 0; i < StaticInstFlags::Flags::Num_Flags:IsLoad; i++) {
+        committedLoad.subname(StaticInstFlags::Flags::IsLoad, StaticInstFlags::FlagsStrings[StaticInstFlags::Flags::IsLoad]);
+        //cout << "load_sum: "<< dec << gem5::StaticInstFlags::Flags::IsLoad << "\n";
+    //}
+
 }
 
 
@@ -1057,6 +1061,7 @@ void
 BaseCPU::
 CommitCPUStats::updateComCtrlStats(const StaticInstPtr staticInst)
 {
+
     /* Add a count for every control instruction type */
     if (staticInst->isControl()) {
         if (staticInst->isReturn()) {
@@ -1083,8 +1088,8 @@ CommitCPUStats::updateComCtrlStats(const StaticInstPtr staticInst)
 
     if (staticInst->isLoad()) {
         committedLoad[gem5::StaticInstFlags::Flags::IsLoad]++;
-    }
-
+        //cout << "get load " << "\n";
+    }   
 }
 
 } // namespace gem5

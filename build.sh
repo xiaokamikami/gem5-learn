@@ -1,1 +1,1 @@
-scons build/RISCV/gem5.opt -j4
+scons build/RISCV/gem5.opt -j16

@@ -472,7 +472,8 @@ BaseSimpleCPU::postExecute()
     commitStats[t_info.thread->threadId()]
         ->committedInstType[curStaticInst->opClass()]++;
     commitStats[t_info.thread->threadId()]->updateComCtrlStats(curStaticInst);
-
+    // using namespace std;
+    // cout << "test\n";
     /* increment the committed numInsts and numOps stats */
     countCommitInst();
 

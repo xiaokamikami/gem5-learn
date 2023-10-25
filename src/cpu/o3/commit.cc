@@ -156,16 +156,19 @@ Commit::CommitStats::CommitStats(CPU *cpu, Commit *commit)
                "The number of times a branch was mispredicted"),
       ADD_STAT(numCommittedDist, statistics::units::Count::get(),
                "Number of insts commited each cycle"),
+      ADD_STAT(numCommittedloads, statistics::units::Count::get(),
+               "Number of loads calls committed."),           
       ADD_STAT(amos, statistics::units::Count::get(),
                "Number of atomic instructions committed"),
       ADD_STAT(membars, statistics::units::Count::get(),
                "Number of memory barriers committed"),
       ADD_STAT(functionCalls, statistics::units::Count::get(),
-               "Number of function calls committed."),
+               "Number of function calls committed."),       
       ADD_STAT(committedInstType, statistics::units::Count::get(),
                "Class of committed instruction"),
       ADD_STAT(commitEligibleSamples, statistics::units::Cycle::get(),
                "number cycles where commit BW limit reached")
+            
 {
     using namespace statistics;
 
@@ -176,6 +179,10 @@ Commit::CommitStats::CommitStats(CPU *cpu, Commit *commit)
     numCommittedDist
         .init(0,commit->commitWidth,1)
         .flags(statistics::pdf);
+
+    numCommittedloads
+        .init(commit->numThreads)
+        .flags(total);
 
     amos
         .init(cpu->numThreads)
@@ -189,11 +196,13 @@ Commit::CommitStats::CommitStats(CPU *cpu, Commit *commit)
         .init(commit->numThreads)
         .flags(total);
 
+
     committedInstType
         .init(commit->numThreads,enums::Num_OpClass)
         .flags(total | pdf | dist);
 
     committedInstType.ysubnames(enums::OpClassStrings);
+
 }
 
 void
@@ -908,11 +917,15 @@ Commit::commitInsts()
     DPRINTF(Commit, "Trying to commit instructions in the ROB.\n");
 
     unsigned num_committed = 0;
-
+    unsigned num_loadcommitted = 0;
     DynInstPtr head_inst;
+
 
     // Commit as many instructions as possible until the commit bandwidth
     // limit is reached, or it becomes impossible to commit any more.
+    using namespace std;
+        // Load Calls 
+   
     while (num_committed < commitWidth) {
         // hardware transactionally memory
         // If executing within a transaction,
@@ -969,6 +982,11 @@ Commit::commitInsts()
 
             // Try to commit the head instruction.
             bool commit_success = commitHead(head_inst, num_committed);
+
+            if (head_inst->isLoad()) {
+                num_loadcommitted++;
+                //DPRINTF(Commit, "num_loadcommitted %d\n",num_loadcommitted);   
+            }
 
             if (commit_success) {
                 ++num_committed;
@@ -1085,9 +1103,19 @@ Commit::commitInsts()
             }
         }
     }
+    
+
+    //Print Load commint count 
+    if (stats.numCommittedloads.total()!=0) {
+        cout << "number loads: "<< stats.numCommittedloads.total()<< "\n";
+        stats.numCommittedloads.reset();
+    }
+
 
     DPRINTF(CommitRate, "%i\n", num_committed);
+
     stats.numCommittedDist.sample(num_committed);
+
 
     if (num_committed == commitWidth) {
         stats.commitEligibleSamples++;
@@ -1336,6 +1364,7 @@ Commit::markCompletedInsts()
 void
 Commit::updateComInstStats(const DynInstPtr &inst)
 {
+    using namespace std;
     ThreadID tid = inst->threadNumber;
 
     if (!inst->isMicroop() || inst->isLastMicroop()) {
@@ -1358,11 +1387,13 @@ Commit::updateComInstStats(const DynInstPtr &inst)
     //
     //  Memory references
     //
+
     if (inst->isMemRef()) {
         cpu->commitStats[tid]->numMemRefs++;
 
         if (inst->isLoad()) {
             cpu->commitStats[tid]->numLoadInsts++;
+            stats.numCommittedloads[tid]++;
         }
 
         if (inst->isStore()) {
@@ -1391,6 +1422,12 @@ Commit::updateComInstStats(const DynInstPtr &inst)
     // Function Calls
     if (inst->isCall())
         stats.functionCalls[tid]++;
+
+
+
+
+        
+
 
 }
 

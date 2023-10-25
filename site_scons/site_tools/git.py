@@ -75,36 +75,36 @@ def install_style_hooks(env):
     if hook_exists("pre-commit") and hook_exists("commit-msg"):
         return
 
-    print(git_style_message, end=" ")
-    if SCons.Script.GetOption("install_hooks"):
-        print("Installing revision control hooks automatically.")
-    else:
-        try:
-            input()
-        except:
-            print("Input exception, exiting scons.\n")
-            sys.exit(1)
+    # print(git_style_message, end=" ")
+    # if SCons.Script.GetOption("install_hooks"):
+    #     print("Installing revision control hooks automatically.")
+    # else:
+    #     try:
+    #         input()
+    #     except:
+    #         print("Input exception, exiting scons.\n")
+    #         sys.exit(1)
 
     pre_commit_install = env.Dir("#util").File("pre-commit-install.sh")
 
-    ret = subprocess.call(str(pre_commit_install), shell=True)
-    if ret != 0:
-        print(
-            "It is strongly recommended you install the pre-commit hooks "
-            "before working with gem5. Do you want to continue compilation "
-            "(y/n)?"
-        )
-        while True:
-            response = input().lower().strip()
-            if response in {"yes", "ye", "y"}:
-                return
-            elif response in {"no", "n"}:
-                sys.exit(1)
-            else:
-                print(
-                    f"Could not parse answer '{response}'. Do you want to "
-                    "continue compilation (y/n)?"
-                )
+    # ret = subprocess.call(str(pre_commit_install), shell=True)
+    # if ret != 0:
+    #     print(
+    #         "It is strongly recommended you install the pre-commit hooks "
+    #         "before working with gem5. Do you want to continue compilation "
+    #         "(y/n)?"
+    #     )
+    #     while True:
+    #         response = input().lower().strip()
+    #         if response in {"yes", "ye", "y"}:
+    #             return
+    #         elif response in {"no", "n"}:
+    #             sys.exit(1)
+    #         else:
+    #             print(
+    #                 f"Could not parse answer '{response}'. Do you want to "
+    #                 "continue compilation (y/n)?"
+    #             )
 
 
 def generate(env):
