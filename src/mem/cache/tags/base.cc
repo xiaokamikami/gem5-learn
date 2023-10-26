@@ -215,6 +215,25 @@ BaseTags::print()
     return str;
 }
 
+std::string
+BaseTags::print_use()
+{
+    std::string str;
+
+    auto print_blk = [&str,this](CacheBlk &blk) {
+        if (blk.isValid())  //get tag+index  , blk.data
+            str += csprintf("\taddr :%8lx  %s \n", regenerateBlkAddr(&blk)  ,blk.print_use());
+    };
+    forEachBlk(print_blk);
+
+    if (str.empty())
+        str = "no valid tags\n";
+
+    return str;
+}
+
+
+
 BaseTags::BaseTagStats::BaseTagStats(BaseTags &_tags)
     : statistics::Group(&_tags),
     tags(_tags),

@@ -192,6 +192,7 @@ BaseCache::regenerateBlkAddr(CacheBlk* blk)
 void
 BaseCache::init()
 {
+    //tags->regenerateBlkAddr
     if (!cpuSidePort.isConnected() || !memSidePort.isConnected())
         fatal("Cache ports on %s are not connected\n", name());
     cpuSidePort.sendRangeChange();
@@ -1716,6 +1717,7 @@ BaseCache::writebackBlk(CacheBlk *blk)
         blk->isSet(CacheBlk::DirtyBit));
 
     if (blk->isSet(CacheBlk::WritableBit)) {
+    
         // not asserting shared means we pass the block in modified
         // state, mark our own block non-writeable
         blk->clearCoherenceBits(CacheBlk::WritableBit);

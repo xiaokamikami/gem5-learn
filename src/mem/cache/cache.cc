@@ -62,7 +62,7 @@
 #include "mem/cache/write_queue_entry.hh"
 #include "mem/request.hh"
 #include "params/Cache.hh"
-
+#include "sim/core.hh"
 namespace gem5
 {
 
@@ -72,7 +72,24 @@ Cache::Cache(const CacheParams &p)
 {
     assert(p.tags);
     assert(p.replacement_policy);
+    using namespace std;
+    cout << "Cache Init " <<dec << p.name << "\n";
+
+    //Dump cache line
+    if ((p.name == "system.cpu.icache")==1 && (p.dump_cache==1)) {
+            registerExitCallback([this]() { 
+                //get line size 
+                cout << "cache Line Size " << this->system->cacheLineSize() << endl;
+                cout << this->tags->print_use() << endl;  // cache_blk.hh and tagged_entry.hh
+                //this->system->printSystems() ;  
+
+                //print cacheline
+
+            });
+    }
+
 }
+
 
 void
 Cache::satisfyRequest(PacketPtr pkt, CacheBlk *blk,
@@ -81,6 +98,7 @@ Cache::satisfyRequest(PacketPtr pkt, CacheBlk *blk,
     BaseCache::satisfyRequest(pkt, blk);
 
     if (pkt->isRead()) {
+     
         // determine if this read is from a (coherent) cache or not
         if (pkt->fromCache()) {
             assert(pkt->getSize() == blkSize);

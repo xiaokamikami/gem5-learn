@@ -1,10 +1,13 @@
 OPT_LIB    =build/RISCV/gem5.opt
 CPU_TYPE   ='O3CPU'
-Debug_Flag =CommitLoad
-OPTIONS    =--l3_size='2MB' --l2_size='256kB' --l1d_size='16kB' --l1i_size='16kB' --dump_cache='0'
+Debug_Flag =Cache
+OPTIONS    =--l3_size='2MB' --l2_size='256kB' --l1d_size='16kB' --l1i_size='16kB' --dump_cache='True'
+zsh:
+	source ~/.profile
 scons:
 	scons $(OPT_LIB) -j16
-
+clean:
+	scons -c
 run_simple:
 	$(OPT_LIB) configs/tutorial/simple.py --cpu_type='TimingSimpleCPU' \
 	$(OPTIONS) PROTOCOL=MOESI_hammer RUBY=True

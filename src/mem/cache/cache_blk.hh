@@ -398,12 +398,24 @@ class CacheBlk : public TaggedEntry
           case 0b000: s = 'I'; break;
           default:    s = 'T'; break; // @TODO add other types
         }
-        return csprintf("state: %x (%c) writable: %d readable: %d "
-            "dirty: %d prefetched: %d | %s", coherence, s,
-            isSet(WritableBit), isSet(ReadableBit), isSet(DirtyBit),
-            wasPrefetched(), TaggedEntry::print());
-    }
+        
+        // return csprintf("state: %x (%c) writable: %d readable: %d "
+        //     "dirty: %d prefetched: %d | %s", coherence, s,
+        //     isSet(WritableBit), isSet(ReadableBit), isSet(DirtyBit),
+        //     wasPrefetched(), TaggedEntry::print());
 
+ 
+        return csprintf("state: %x (%c) , %s",coherence, s, TaggedEntry::print());
+    }
+    std::string
+    print_use()
+    {
+        // uint64_t dataValue = 0;  
+        // for (int i = 0; i < sizeof(uint64_t); ++i) {  
+        //     dataValue |= static_cast<uint64_t>(data[i]) << (i * 8);  
+        // }  
+        return csprintf("data: %#x", *(uint64_t *)data);
+    }
     /**
      * Handle interaction of load-locked operations and stores.
      * @return True if write should proceed, false otherwise.  Returns

@@ -188,7 +188,7 @@ class BaseTags : public ClockedObject
      * Print all tags used
      */
     std::string print();
-
+    std::string print_use();
     /**
      * Finds the block in the cache without touching it.
      *
