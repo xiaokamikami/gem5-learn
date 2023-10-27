@@ -54,7 +54,7 @@
 #include "sim/core.hh"
 #include "sim/sim_exit.hh"
 #include "sim/system.hh"
-
+#include "mem/cache/tags/sector_tags.hh"
 namespace gem5
 {
 
@@ -219,12 +219,24 @@ std::string
 BaseTags::print_use()
 {
     std::string str;
-
+/*     
     auto print_blk = [&str,this](CacheBlk &blk) {
         if (blk.isValid())  //get tag+index  , blk.data
             str += csprintf("\taddr :%8lx  %s \n", regenerateBlkAddr(&blk)  ,blk.print_use());
     };
-    forEachBlk(print_blk);
+    forEachBlk(print_blk); 
+     */
+    std::vector<CacheBlk*> blk_RP_v;
+    uint32_t blksize = blkSize;
+    uint32_t cachelinesize = system->cacheLineSize();
+    str += csprintf("\t blksize %d cacheLineSize % d \n", blksize, cachelinesize);
+    
+    for (size_t i = 0; i < blkSize*cachelinesize; i+=cachelinesize) {/* code */
+        CacheBlk *blk=findVictim(i , 1 , cachelinesize , blk_RP_v);
+        str += csprintf("\twhy:%d addr :%8lx  %lx \n",blk->getWay(), regenerateBlkAddr(blk)  ,*(uint64_t *)blk->data);
+        //str += csprintf("\t%s \n", blk->print());
+    }
+    
 
     if (str.empty())
         str = "no valid tags\n";

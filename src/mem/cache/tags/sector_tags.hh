@@ -202,7 +202,7 @@ class SectorTags : public BaseTags
      * @param visitor Visitor to call on each block.
      */
     void forEachBlk(std::function<void(CacheBlk &)> visitor) override;
-
+    void forEachBlk_RP(std::function<void(CacheBlk &)> visitor);
     /**
      * Find if any of the sub-blocks satisfies a condition.
      *
@@ -213,6 +213,9 @@ class SectorTags : public BaseTags
      * @param visitor Visitor to call on each block.
      */
     bool anyBlk(std::function<bool(CacheBlk &)> visitor) override;
+
+
+
 };
 
 } // namespace gem5

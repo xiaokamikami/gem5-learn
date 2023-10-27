@@ -55,6 +55,7 @@
 #include "debug/Cache.hh"
 #include "debug/CacheTags.hh"
 #include "debug/CacheVerbose.hh"
+#include "debug/CacheMiss.hh"
 #include "enums/Clusivity.hh"
 #include "mem/cache/cache_blk.hh"
 #include "mem/cache/mshr.hh"
@@ -74,13 +75,15 @@ Cache::Cache(const CacheParams &p)
     assert(p.replacement_policy);
     using namespace std;
     cout << "Cache Init " <<dec << p.name << "\n";
-
+    //cout << "Replacement_policy name " << p.Replacement_policy<< endl;
     //Dump cache line
     if ((p.name == "system.cpu.icache")==1 && (p.dump_cache==1)) {
             registerExitCallback([this]() { 
                 //get line size 
-                cout << "cache Line Size " << this->system->cacheLineSize() << endl;
+                cout << "Dump cache Line Size " << this->system->cacheLineSize() << endl;
                 cout << this->tags->print_use() << endl;  // cache_blk.hh and tagged_entry.hh
+
+                //cout << " " << this->replacement_policy->print() << endl;
                 //this->system->printSystems() ;  
 
                 //print cacheline
@@ -188,7 +191,7 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                     name());
 
         DPRINTF(Cache, "%s for %s\n", __func__, pkt->print());
-
+        //tags->findVictim
         // flush and invalidate any existing block
         CacheBlk *old_blk(tags->findBlock(pkt->getAddr(), pkt->isSecure()));
         if (old_blk && old_blk->isValid()) {
@@ -358,7 +361,7 @@ Cache::handleTimingReqMiss(PacketPtr pkt, CacheBlk *blk, Tick forward_time,
             allocateWriteBuffer(pkt, forward_time);
         } else {
             assert(pkt->isRead());
-
+            
             // uncacheable accesses always allocate a new MSHR
 
             // Here we are using forward_time, modelling the latency of
@@ -513,6 +516,7 @@ Cache::createMissPacket(PacketPtr cpu_pkt, CacheBlk *blk,
     }
 
     assert(cpu_pkt->needsResponse());
+    DPRINTF(CacheMiss,"Cache miss %lx",tags->regenerateBlkAddr(blk));
 
     MemCmd cmd;
     // @TODO make useUpgrades a parameter.
