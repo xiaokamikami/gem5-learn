@@ -81,7 +81,7 @@ class L2Cache(Cache):
 
 
 class L3Cache(Cache):
-    assoc = 64
+    assoc = 32
     hit_latency = 32
     response_latency = 32
     mshrs = 32

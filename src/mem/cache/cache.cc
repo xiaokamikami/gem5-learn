@@ -74,23 +74,18 @@ Cache::Cache(const CacheParams &p)
     assert(p.tags);
     assert(p.replacement_policy);
     using namespace std;
-    cout << "Cache Init " <<dec << p.name << "\n";
+    cout << "Cache Init " <<dec << p.name << "observe_cache_miss==" << p.dump_cacheMiss  << endl;
     //cout << "Replacement_policy name " << p.Replacement_policy<< endl;
-    //Dump cache line
+    
+    //Dump cache line exit-event
     if ((p.name == "system.cpu.icache")==1 && (p.dump_cache==1)) {
             registerExitCallback([this]() { 
                 //get line size 
                 cout << "Dump cache Line Size " << this->system->cacheLineSize() << endl;
                 cout << this->tags->print_use() << endl;  // cache_blk.hh and tagged_entry.hh
-
-                //cout << " " << this->replacement_policy->print() << endl;
-                //this->system->printSystems() ;  
-
-                //print cacheline
-
             });
     }
-
+    
 }
 
 
@@ -505,6 +500,10 @@ Cache::createMissPacket(PacketPtr cpu_pkt, CacheBlk *blk,
     // should never see evictions here
     assert(!cpu_pkt->isEviction());
 
+    if(dumpMiss==true)
+        DPRINTF(CacheMiss,"Cache miss addr:%lx \n",cpu_pkt->getAddr());
+    
+
     bool blkValid = blk && blk->isValid();
 
     if (cpu_pkt->req->isUncacheable() ||
@@ -516,7 +515,7 @@ Cache::createMissPacket(PacketPtr cpu_pkt, CacheBlk *blk,
     }
 
     assert(cpu_pkt->needsResponse());
-    DPRINTF(CacheMiss,"Cache miss %lx",tags->regenerateBlkAddr(blk));
+
 
     MemCmd cmd;
     // @TODO make useUpgrades a parameter.
@@ -609,7 +608,7 @@ Cache::handleAtomicReqMiss(PacketPtr pkt, CacheBlk *&blk,
                                          pkt->isWholeLineWrite(blkSize));
 
     bool is_forward = (bus_pkt == nullptr);
-
+    
     if (is_forward) {
         // just forwarding the same request to the next level
         // no local cache operation involved

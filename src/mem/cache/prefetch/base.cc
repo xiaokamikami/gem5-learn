@@ -46,7 +46,6 @@
 #include "mem/cache/prefetch/base.hh"
 
 #include <cassert>
-
 #include "base/intmath.hh"
 #include "mem/cache/base.hh"
 #include "params/BasePrefetcher.hh"
@@ -65,6 +64,7 @@ Base::PrefetchInfo::PrefetchInfo(PacketPtr pkt, Addr addr, bool miss)
     paddress(pkt->req->getPaddr()), cacheMiss(miss)
 {
     unsigned int req_size = pkt->req->getSize();
+
     if (!write && miss) {
         data = nullptr;
     } else {
