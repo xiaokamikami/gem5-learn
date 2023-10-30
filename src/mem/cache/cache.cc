@@ -77,12 +77,12 @@ Cache::Cache(const CacheParams &p)
     cout << "Cache Init " <<dec << p.name << "\n";
     //cout << "Replacement_policy name " << p.Replacement_policy<< endl;
     //Dump cache line
-    if ((p.name == "system.cpu.icache")==1 && (p.dump_cache==1)) {
+    if (p.dump_cache==1) {
             registerExitCallback([this]() { 
                 //get line size 
-                cout << "Dump cache Line Size " << this->system->cacheLineSize() << endl;
+                cout << "Dump "<< this->name() << "Line Size " << this->system->cacheLineSize() << endl;
                 cout << this->tags->print_use() << endl;  // cache_blk.hh and tagged_entry.hh
-
+        
                 //cout << " " << this->replacement_policy->print() << endl;
                 //this->system->printSystems() ;  
 
@@ -191,7 +191,6 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                     name());
 
         DPRINTF(Cache, "%s for %s\n", __func__, pkt->print());
-        //tags->findVictim
         // flush and invalidate any existing block
         CacheBlk *old_blk(tags->findBlock(pkt->getAddr(), pkt->isSecure()));
         if (old_blk && old_blk->isValid()) {

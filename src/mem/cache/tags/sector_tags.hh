@@ -176,7 +176,8 @@ class SectorTags : public BaseTags
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
                          std::vector<CacheBlk*>& evict_blks) override;
-
+    void      findPolicyVictim(Addr addr, const bool is_secure, const std::size_t size,
+                       std::vector<CacheBlk*>& evict_blks);
     /**
      * Calculate a block's offset in a sector from the address.
      *
@@ -202,7 +203,7 @@ class SectorTags : public BaseTags
      * @param visitor Visitor to call on each block.
      */
     void forEachBlk(std::function<void(CacheBlk &)> visitor) override;
-    void forEachBlk_RP(std::function<void(CacheBlk &)> visitor);
+
     /**
      * Find if any of the sub-blocks satisfies a condition.
      *

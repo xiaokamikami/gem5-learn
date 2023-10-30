@@ -54,7 +54,7 @@
 #include "base/logging.hh"
 #include "mem/cache/base.hh"
 #include "mem/cache/replacement_policies/replaceable_entry.hh"
-
+#include "mem/cache/tags/fa_lru.hh"
 namespace gem5
 {
 

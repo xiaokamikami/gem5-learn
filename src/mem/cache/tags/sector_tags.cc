@@ -321,6 +321,30 @@ SectorTags::findVictim(Addr addr, const bool is_secure, const std::size_t size,
 
     return victim;
 }
+void
+SectorTags::findPolicyVictim(Addr addr, const bool is_secure, const std::size_t size,
+                       std::vector<CacheBlk*>& evict_blks){
+ // Get possible entries to be victimized
+    const std::vector<ReplaceableEntry*> sector_entries =
+        indexingPolicy->getPossibleEntries(addr);
+
+    // Check if the sector this address belongs to has been allocated
+    Addr tag = extractTag(addr);
+    SectorBlk* victim_sector = static_cast<SectorBlk*>(replacementPolicy->getVictim(
+                                                sector_entries));
+
+    // The whole sector must be evicted to make room for the new sector
+    for (const auto& blk : victim_sector->blks){
+        if (blk->isValid()) {
+            evict_blks.push_back(blk);
+        }
+    }
+    
+  
+}
+
+
+
 
 int
 SectorTags::extractSectorOffset(Addr addr) const
@@ -366,31 +390,6 @@ SectorTags::forEachBlk(std::function<void(CacheBlk &)> visitor)
         visitor(blk);
     }
 }
-
-void
-SectorTags::forEachBlk_RP(std::function<void(CacheBlk &)> visitor)
-{
-/*     std::vector<gem5::CacheBlk*> blk_RP_V;
-    for (SectorSubBlk& blk : blks) {
-        std::vector<gem5::CacheBlk*> blk_RP_provi;
-        blk_RP_provi.push_back(&blk);
-        uint64_t addr    = regenerateBlkAddr(&blk);
-        CacheBlk *blk_RP = findVictim(addr,1,64,blk_RP_V);
-        blk_RP_V.push_back(blk_RP);
-    }
-
-    for (size_t i = 0; i < blk_RP_V.size(); i++)
-    {
-      
-        visitor(*blk_RP_V[i]);
-    } */
-    // for (uint64_t i = 0 ; i < blks.size() ; i++) {
-    //     CacheBlk *blk_RP = findVictim(i,1,64,blks);
-    //     visitor(blk_RP);
-    // }
-
-} 
-
 
 bool
 SectorTags::anyBlk(std::function<bool(CacheBlk &)> visitor)

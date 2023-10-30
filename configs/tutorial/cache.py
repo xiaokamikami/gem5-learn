@@ -32,7 +32,7 @@ class L1ICache(L1Cache):
         if not options or not options.l1i_size:
             return
         self.size       = options.l1i_size
-        self.dump_cache = options.dump_cache
+        self.dump_cache = True if 'L1I' in options.dump_cache else False
     def connectCPU(self, cpu):
         self.cpu_side = cpu.icache_port
 
@@ -45,7 +45,7 @@ class L1DCache(L1Cache):
         if not options or not options.l1d_size:
             return
         self.size = options.l1d_size
-
+        self.dump_cache = True if 'L1D' in options.dump_cache else False
     def connectCPU(self, cpu):
         self.cpu_side = cpu.dcache_port
 
@@ -65,7 +65,7 @@ class L2Cache(Cache):
         if not options or not options.l2_size:
             return
         self.size = options.l2_size
-
+        self.dump_cache = True if 'L2' in options.dump_cache else False
     def connectCPUSideBus(self, bus):
         self.cpu_side = bus.mem_side_ports
 
@@ -89,7 +89,7 @@ class L3Cache(Cache):
         if not options or not options.l3_size:
             return
         self.size = options.l3_size
-
+        self.dump_cache = True if 'L3' in options.dump_cache else False
     def connectCPUSideBus(self, bus):
 
         self.cpu_side = bus.mem_side_ports
