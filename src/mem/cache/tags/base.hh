@@ -188,7 +188,7 @@ class BaseTags : public ClockedObject
      * Print all tags used
      */
     std::string print();
-
+    std::string print_use();
     /**
      * Finds the block in the cache without touching it.
      *
@@ -337,7 +337,6 @@ class BaseTags : public ClockedObject
      * @param visitor Visitor to call on each block.
      */
     virtual void forEachBlk(std::function<void(CacheBlk &)> visitor) = 0;
-
     /**
      * Find if any of the blocks satisfies a condition
      *

@@ -367,6 +367,31 @@ SectorTags::forEachBlk(std::function<void(CacheBlk &)> visitor)
     }
 }
 
+void
+SectorTags::forEachBlk_RP(std::function<void(CacheBlk &)> visitor)
+{
+/*     std::vector<gem5::CacheBlk*> blk_RP_V;
+    for (SectorSubBlk& blk : blks) {
+        std::vector<gem5::CacheBlk*> blk_RP_provi;
+        blk_RP_provi.push_back(&blk);
+        uint64_t addr    = regenerateBlkAddr(&blk);
+        CacheBlk *blk_RP = findVictim(addr,1,64,blk_RP_V);
+        blk_RP_V.push_back(blk_RP);
+    }
+
+    for (size_t i = 0; i < blk_RP_V.size(); i++)
+    {
+      
+        visitor(*blk_RP_V[i]);
+    } */
+    // for (uint64_t i = 0 ; i < blks.size() ; i++) {
+    //     CacheBlk *blk_RP = findVictim(i,1,64,blks);
+    //     visitor(blk_RP);
+    // }
+
+} 
+
+
 bool
 SectorTags::anyBlk(std::function<bool(CacheBlk &)> visitor)
 {

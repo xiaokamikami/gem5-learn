@@ -55,6 +55,7 @@
 #include "debug/Cache.hh"
 #include "debug/CacheTags.hh"
 #include "debug/CacheVerbose.hh"
+#include "debug/CacheMiss.hh"
 #include "enums/Clusivity.hh"
 #include "mem/cache/cache_blk.hh"
 #include "mem/cache/mshr.hh"
@@ -62,7 +63,7 @@
 #include "mem/cache/write_queue_entry.hh"
 #include "mem/request.hh"
 #include "params/Cache.hh"
-
+#include "sim/core.hh"
 namespace gem5
 {
 
@@ -72,7 +73,21 @@ Cache::Cache(const CacheParams &p)
 {
     assert(p.tags);
     assert(p.replacement_policy);
+    using namespace std;
+    cout << "Cache Init " <<dec << p.name << "observe_cache_miss==" << p.dump_cacheMiss  << endl;
+    //cout << "Replacement_policy name " << p.Replacement_policy<< endl;
+    
+    //Dump cache line exit-event
+    if ((p.name == "system.cpu.icache")==1 && (p.dump_cache==1)) {
+            registerExitCallback([this]() { 
+                //get line size 
+                cout << "Dump cache Line Size " << this->system->cacheLineSize() << endl;
+                cout << this->tags->print_use() << endl;  // cache_blk.hh and tagged_entry.hh
+            });
+    }
+    
 }
+
 
 void
 Cache::satisfyRequest(PacketPtr pkt, CacheBlk *blk,
@@ -81,6 +96,7 @@ Cache::satisfyRequest(PacketPtr pkt, CacheBlk *blk,
     BaseCache::satisfyRequest(pkt, blk);
 
     if (pkt->isRead()) {
+     
         // determine if this read is from a (coherent) cache or not
         if (pkt->fromCache()) {
             assert(pkt->getSize() == blkSize);
@@ -170,7 +186,7 @@ Cache::access(PacketPtr pkt, CacheBlk *&blk, Cycles &lat,
                     name());
 
         DPRINTF(Cache, "%s for %s\n", __func__, pkt->print());
-
+        //tags->findVictim
         // flush and invalidate any existing block
         CacheBlk *old_blk(tags->findBlock(pkt->getAddr(), pkt->isSecure()));
         if (old_blk && old_blk->isValid()) {
@@ -340,7 +356,7 @@ Cache::handleTimingReqMiss(PacketPtr pkt, CacheBlk *blk, Tick forward_time,
             allocateWriteBuffer(pkt, forward_time);
         } else {
             assert(pkt->isRead());
-
+            
             // uncacheable accesses always allocate a new MSHR
 
             // Here we are using forward_time, modelling the latency of
@@ -484,6 +500,10 @@ Cache::createMissPacket(PacketPtr cpu_pkt, CacheBlk *blk,
     // should never see evictions here
     assert(!cpu_pkt->isEviction());
 
+    if(dumpMiss==true)
+        DPRINTF(CacheMiss,"Cache miss addr:%lx \n",cpu_pkt->getAddr());
+    
+
     bool blkValid = blk && blk->isValid();
 
     if (cpu_pkt->req->isUncacheable() ||
@@ -495,6 +515,7 @@ Cache::createMissPacket(PacketPtr cpu_pkt, CacheBlk *blk,
     }
 
     assert(cpu_pkt->needsResponse());
+
 
     MemCmd cmd;
     // @TODO make useUpgrades a parameter.
@@ -587,7 +608,7 @@ Cache::handleAtomicReqMiss(PacketPtr pkt, CacheBlk *&blk,
                                          pkt->isWholeLineWrite(blkSize));
 
     bool is_forward = (bus_pkt == nullptr);
-
+    
     if (is_forward) {
         // just forwarding the same request to the next level
         // no local cache operation involved

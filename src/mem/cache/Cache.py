@@ -80,9 +80,12 @@ class WriteAllocator(SimObject):
 class BaseCache(ClockedObject):
     type = "BaseCache"
     abstract = True
+
     cxx_header = "mem/cache/base.hh"
     cxx_class = "gem5::BaseCache"
-
+    dump_cache     = Param.Bool(False,"Enable Dump cache line")
+    dump_cacheMiss = Param.Bool(False,"Enable Dump cache miss addr")
+    
     size = Param.MemorySize("Capacity")
     assoc = Param.Unsigned("Associativity")
 

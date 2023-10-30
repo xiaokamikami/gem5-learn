@@ -93,6 +93,7 @@ BaseCache::BaseCache(const BaseCacheParams &p, unsigned blk_size)
                                     name(), false,
                                     EventBase::Delayed_Writeback_Pri),
       blkSize(blk_size),
+      dumpMiss(p.dump_cacheMiss),
       lookupLatency(p.tag_latency),
       dataLatency(p.data_latency),
       forwardLatency(p.tag_latency),
@@ -192,6 +193,7 @@ BaseCache::regenerateBlkAddr(CacheBlk* blk)
 void
 BaseCache::init()
 {
+    //tags->regenerateBlkAddr
     if (!cpuSidePort.isConnected() || !memSidePort.isConnected())
         fatal("Cache ports on %s are not connected\n", name());
     cpuSidePort.sendRangeChange();
@@ -1716,6 +1718,7 @@ BaseCache::writebackBlk(CacheBlk *blk)
         blk->isSet(CacheBlk::DirtyBit));
 
     if (blk->isSet(CacheBlk::WritableBit)) {
+    
         // not asserting shared means we pass the block in modified
         // state, mark our own block non-writeable
         blk->clearCoherenceBits(CacheBlk::WritableBit);
