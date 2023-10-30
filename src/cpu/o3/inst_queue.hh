@@ -526,6 +526,9 @@ class InstructionQueue
          * instruction. */
         // statistics::VectorDistribution issueDelayDist;
 
+        //The number of cycles for differen Load instruction launches
+        statistics::Distribution numIssuedLoad;
+
         /** Number of times an instruction could not be issued because a
          * FU was busy.
          */
@@ -560,6 +563,7 @@ class InstructionQueue
         statistics::Scalar intAluAccesses;
         statistics::Scalar fpAluAccesses;
         statistics::Scalar vecAluAccesses;
+
     } iqIOStats;
 };
 

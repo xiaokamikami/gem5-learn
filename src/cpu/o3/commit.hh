@@ -479,7 +479,7 @@ class Commit
         /** Distribution of the number of committed instructions each cycle. */
         statistics::Distribution numCommittedDist;
         /** the number of committed loads cycle. */
-        statistics::Vector numCommittedloads;
+        statistics::Vector numCommittedLoads;
 
         /** Stat for the total number of committed atomics. */
         statistics::Vector amos;

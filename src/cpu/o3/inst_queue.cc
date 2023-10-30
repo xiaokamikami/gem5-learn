@@ -49,6 +49,7 @@
 #include "cpu/o3/fu_pool.hh"
 #include "cpu/o3/limits.hh"
 #include "debug/IQ.hh"
+#include "debug/IssueLoad.hh"
 #include "enums/OpClass.hh"
 #include "params/BaseO3CPU.hh"
 #include "sim/core.hh"
@@ -207,6 +208,8 @@ InstructionQueue::IQStats::IQStats(CPU *cpu, const unsigned &total_width)
              "Number of squashed non-spec instructions that were removed"),
     ADD_STAT(numIssuedDist, statistics::units::Count::get(),
              "Number of insts issued each cycle"),
+    ADD_STAT(numIssuedLoad, statistics::units::Count::get(),
+             "The number of cycles for different Load instruction launches"),        
     ADD_STAT(statFuBusy, statistics::units::Count::get(),
              "attempts to use FU when none available"),
     ADD_STAT(statIssuedInstType, statistics::units::Count::get(),
@@ -269,6 +272,11 @@ InstructionQueue::IQStats::IQStats(CPU *cpu, const unsigned &total_width)
         .init(0,total_width,1)
         .flags(statistics::pdf)
         ;
+
+    numIssuedLoad
+        .init(0,total_width,1)
+        .flags(statistics::pdf)
+        ;       
 /*
     dist_unissued
         .init(Num_OpClasses+2)
@@ -387,7 +395,7 @@ InstructionQueue::IQIOStats::IQIOStats(statistics::Group *parent)
         .flags(total);
 
     vecAluAccesses
-        .flags(total);
+        .flags(total);    
 }
 
 void
@@ -777,7 +785,7 @@ InstructionQueue::scheduleReadyInsts()
     int total_issued = 0;
     ListOrderIt order_it = listOrder.begin();
     ListOrderIt order_end_it = listOrder.end();
-
+    uint16_t num_issuedLoad = 0;
     while (total_issued < totalWidth && order_it != order_end_it) {
         OpClass op_class = (*order_it).queueType;
 
@@ -891,7 +899,11 @@ InstructionQueue::scheduleReadyInsts()
                 ++freeEntries;
                 count[tid]--;
                 issuing_inst->clearInIQ();
+                
             } else {
+                if (issuing_inst->isLoad())
+                    num_issuedLoad++;
+
                 memDepUnit[tid].issue(issuing_inst);
             }
 
@@ -903,8 +915,9 @@ InstructionQueue::scheduleReadyInsts()
             ++order_it;
         }
     }
-
+    //DPRINTF(IssueLoad,"issueLoad count %d \n",num_issuedLoad);
     iqStats.numIssuedDist.sample(total_issued);
+    iqStats.numIssuedLoad.sample(num_issuedLoad); 
     iqStats.instsIssued+= total_issued;
 
     // If we issued any instructions, tell the CPU we had activity.

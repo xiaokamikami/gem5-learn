@@ -158,7 +158,7 @@ Commit::CommitStats::CommitStats(CPU *cpu, Commit *commit)
                "The number of times a branch was mispredicted"),
       ADD_STAT(numCommittedDist, statistics::units::Count::get(),
                "Number of insts commited each cycle"),
-      ADD_STAT(numCommittedloads, statistics::units::Count::get(),
+      ADD_STAT(numCommittedLoads, statistics::units::Count::get(),
                "Number of loads calls committed."),           
       ADD_STAT(amos, statistics::units::Count::get(),
                "Number of atomic instructions committed"),
@@ -182,7 +182,7 @@ Commit::CommitStats::CommitStats(CPU *cpu, Commit *commit)
         .init(0,commit->commitWidth,1)
         .flags(statistics::pdf);
 
-    numCommittedloads
+    numCommittedLoads
         .init(commit->numThreads)
         .flags(total);
 
@@ -1103,10 +1103,9 @@ Commit::commitInsts()
     
     cycle_count++;
     //Print Load commint count 
-    if (stats.numCommittedloads.total()!=0) {
-        DPRINTF(CommitLoad,"Load commint :%d\n",stats.numCommittedloads.total());
-        //cout <<"Cycle " <<cycle_count << " : loads "<< stats.numCommittedloads.total()<< "\n";
-        stats.numCommittedloads.reset();
+    if (stats.numCommittedLoads.total()!=0) {
+        DPRINTF(CommitLoad,"Load commint :%d\n",stats.numCommittedLoads.total());
+        stats.numCommittedLoads.reset();
     }
 
 
@@ -1391,7 +1390,7 @@ Commit::updateComInstStats(const DynInstPtr &inst)
 
         if (inst->isLoad()) {
             cpu->commitStats[tid]->numLoadInsts++;
-            stats.numCommittedloads[tid]++;
+            stats.numCommittedLoads[tid]++;
         }
 
         if (inst->isStore()) {

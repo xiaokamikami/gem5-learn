@@ -1,6 +1,7 @@
 OPT_LIB    =build/RISCV/gem5.opt
 CPU_TYPE   ='O3CPU'
-Debug_Flag =CommitLoad
+#Debug_Flag = CommitLoad IssueLoad
+Debug_Flag =IssueLoad
 OPTIONS    =--l3_size='2MB' --l2_size='256kB' --l1d_size='16kB' --l1i_size='16kB' --dump_cache='0'
 scons:
 	scons $(OPT_LIB) -j16
