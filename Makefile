@@ -1,10 +1,10 @@
 OPT_LIB    =build/RISCV/gem5.opt
 CPU_TYPE   ='O3CPU'
 #DIY-Debug_Flag  CacheMiss CommitLoad IssueLoad
-Debug_Flag =CacheMiss
-#dump_cache = True / False
+Debug_Flag =IQ
 
-OPTIONS    =--l3_size='2MB' --l2_size='256kB' --l1d_size='16kB' --l1i_size='16kB' --dump_cache='L1I' --observe_cache_miss='L2'
+#OPTIONS: dump_cache /observe_cache_miss = 'L1I,L1D,L2,L3'
+OPTIONS    =--l3_size='2MB' --l2_size='256kB' --l1d_size='16kB' --l1i_size='16kB' --dump_cache='' --observe_cache_miss=''
 
 zsh:
 	source ~/.profile

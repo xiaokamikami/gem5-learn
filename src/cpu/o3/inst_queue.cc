@@ -589,6 +589,18 @@ InstructionQueue::insert(const DynInstPtr &new_inst)
 
     --freeEntries;
 
+/*
+     RegIndex src1=0,src2=0,dest=0;
+    if (!new_inst->numDestRegs())
+        dest = new_inst->destRegIdx(0).index();
+    if (!new_inst->numDestRegs())
+        src1 = new_inst->srcRegIdx(0).index();
+    if (new_inst->numDestRegs()==2) {
+        src2 = new_inst->srcRegIdx(1).index();  
+    }
+    dependGraph.findRelyOn(src1,src2,dest,new_inst->seqNum); 
+ */
+
     new_inst->setInIQ();
 
     // Look through its source registers (physical regs), and mark any
@@ -1047,6 +1059,12 @@ InstructionQueue::wakeDependents(const DynInstPtr &completed_inst)
         //Go through the dependency chain, marking the registers as
         //ready within the waiting instructions.
         DynInstPtr dep_inst = dependGraph.pop(dest_reg->flatIndex());
+
+
+        //Print dependent reqnum
+        std::string str;
+        str = csprintf("%d << distance << %d\n",completed_inst->seqNum,dependGraph.getSeqNum(dest_reg->flatIndex()));
+        std::cout << str << std::endl;
 
         while (dep_inst) {
             DPRINTF(IQ, "Waking up a dependent instruction, [sn:%llu] "
@@ -1519,7 +1537,8 @@ InstructionQueue::dumpInsts()
         int num = 0;
         int valid_num = 0;
         ListIt inst_list_it = instList[tid].begin();
-
+        //(*inst_list_it)->seqNum;
+        
         while (inst_list_it != instList[tid].end()) {
             cprintf("Instruction:%i\n", num);
             if (!(*inst_list_it)->isSquashed()) {

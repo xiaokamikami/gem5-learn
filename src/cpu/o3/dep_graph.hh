@@ -55,13 +55,18 @@ class DependencyEntry
 {
   public:
     DependencyEntry()
-        : inst(NULL), next(NULL)
+        : inst(NULL), next(NULL),index1(0),index2(0),dest(0),seqNum(0)
     { }
 
     DynInstPtr inst;
     //Might want to include data about what arch. register the
     //dependence is waiting on.
     DependencyEntry<DynInstPtr> *next;
+
+    RegIndex   index1;   //seqnum of the current instruction.
+    RegIndex   index2;  //seqnum of the current instruction.
+    RegIndex   dest;
+    uint64_t   seqNum;
 };
 
 /** Array of linked list that maintains the dependencies between
@@ -118,6 +123,13 @@ class DependencyGraph
     /** Debugging function to dump out the dependency graph.
      */
     void dump();
+
+    //** Finds the dependencies of the instruction. */
+    void findRelyOn(RegIndex idx1 ,RegIndex idx2 ,RegIndex dest,uint64_t seqNum );
+
+    //** Get seqnum .*/
+    uint64_t getSeqNum(RegIndex idx)
+    { return dependGraph[idx].seqNum;};
 
   private:
     /** Array of linked lists.  Each linked list is a list of all the
@@ -196,9 +208,17 @@ DependencyGraph<DynInstPtr>::insert(RegIndex idx, const DynInstPtr &new_inst)
     new_entry->next = dependGraph[idx].next;
     new_entry->inst = new_inst;
 
-    // Then actually add it to the chain.
-    dependGraph[idx].next = new_entry;
+    new_entry->dest   = new_inst->destRegIdx(0).index();
+    new_entry->index1 = new_inst->srcRegIdx(0).index();
+    new_entry->index2 = new_inst->srcRegIdx(1).index();
+    new_entry->seqNum = new_inst->seqNum;
 
+    // Then actually add it to the chain.
+    dependGraph[idx].next   = new_entry;
+    dependGraph[idx].dest   = new_entry->dest;
+    dependGraph[idx].index1 = new_entry->index1; 
+    dependGraph[idx].index2 = new_entry->index2; 
+    dependGraph[idx].seqNum = new_entry->seqNum;
     ++memAllocCounter;
 }
 
@@ -297,6 +317,51 @@ DependencyGraph<DynInstPtr>::dump()
     }
     cprintf("memAllocCounter: %i\n", memAllocCounter);
 }
+
+
+/**
+ * Check register dependencies
+ * 
+ * 
+ */
+template <class DynInstPtr>
+void
+DependencyGraph<DynInstPtr>:: findRelyOn(RegIndex idx1 ,RegIndex idx2 ,RegIndex dest,uint64_t seqNum){
+    DepEntry *curr;
+
+    for (int i = 0; i < numEntries; ++i) {
+        std::string str;
+        curr = &dependGraph[i];
+        //RAW
+        if (curr->dest == idx1 && idx1!=0 ) {
+            str +=  csprintf("%d << distance << %d :RAW\n",curr->seqNum, seqNum);
+        } 
+        else if (curr->dest == idx2 && idx2!=0 ) {
+            str +=  csprintf("%d << distance << %d :RAW\n",curr->seqNum , seqNum);
+        }
+
+        //WAR
+        if ((curr->index1 == idx1 || curr->index2 == idx1) && idx1!=0 ) {
+            str +=  csprintf("%d >> distance >> %d :WAR\n",curr->seqNum , seqNum);
+        } 
+        if ((curr->index1 == idx2 || curr->index2 == idx2) && idx2!=0 ) {
+            str +=  csprintf("%d >> distance >> %d :WAR\n",curr->seqNum , seqNum);
+        }
+
+        //WAW
+        if (curr->dest == dest && dest!=0 ) {
+            str +=  csprintf("%d << distance << %d :WAW\n",curr->seqNum , seqNum);
+        }
+
+        if (!str.empty())
+            std::cout << str << std::endl;
+        
+    }
+
+
+}
+
+
 
 } // namespace o3
 } // namespace gem5
