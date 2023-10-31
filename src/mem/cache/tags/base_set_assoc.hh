@@ -167,16 +167,38 @@ class BaseSetAssoc : public BaseTags
      */
     CacheBlk* findVictim(Addr addr, const bool is_secure,
                          const std::size_t size,
-                         std::vector<CacheBlk*>& evict_blks) override
+                         std::vector<CacheBlk*>& evict_blks ,
+                        bool dump_cache=false) override
     {
         // Get possible entries to be victimized
         const std::vector<ReplaceableEntry*> entries =
             indexingPolicy->getPossibleEntries(addr);
 
-        // Choose replacement victim from replacement candidates
-        CacheBlk* victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(
-                                entries));
+        CacheBlk* victim;
+        if (dump_cache==true) {
+/*             for (auto it = entries.begin(); it != entries.end(); it++) {   
+                CacheBlk* blk = static_cast<CacheBlk*>(*it);   
+                if (!blk->isValid())  
+                    it = entries.erase(it);
+            } */
+                for (uint8_t i = 0; i <allocAssoc ; i++) {  //find is vaild blk 
+                    // Choose replacement victim from replacement candidates
+                    victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(
+                                            entries));
+                    // set this blk replacement policies tick  and set unvaild                       
+                    if (victim->isValid()) {
+                        replacementPolicy->reset(victim->replacementData);
+                        break;
+                    }
+                }
+                
 
+        
+        } else {
+            // Choose replacement victim from replacement candidates
+            victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(
+                                    entries));
+        }
         // There is only one eviction for this replacement
         evict_blks.push_back(victim);
 

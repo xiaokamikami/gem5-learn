@@ -54,7 +54,7 @@
 #include "sim/core.hh"
 #include "sim/sim_exit.hh"
 #include "sim/system.hh"
-#include "mem/cache/tags/sector_tags.hh"
+
 namespace gem5
 {
 
@@ -219,30 +219,48 @@ std::string
 BaseTags::print_use()
 {
     std::string str;
-/*     
-    auto print_blk = [&str,this](CacheBlk &blk) {
-        if (blk.isValid())  //get tag+index  , blk.data
-            str += csprintf("\taddr :%8lx  %s \n", regenerateBlkAddr(&blk)  ,blk.print_use());
-    };
-    forEachBlk(print_blk); 
-     */
+    std::string datas;
     std::vector<CacheBlk*> blk_RP_v;
-    uint32_t blksize = blkSize;
-    uint32_t cachelinesize = system->cacheLineSize();
-    str += csprintf("\t blksize %d cacheLineSize % d \n", blksize, cachelinesize);
-    
-    for (size_t i = 0; i < blkSize*cachelinesize; i+=cachelinesize) {/* code */
-        CacheBlk *blk=findVictim(i , 1 , cachelinesize , blk_RP_v);
-        str += csprintf("\twhy:%d addr :%8lx  %lx \n",blk->getWay(), regenerateBlkAddr(blk)  ,*(uint64_t *)blk->data);
-        //str += csprintf("\t%s \n", blk->print());
+    //The step size of the cacheLine
+    uint32_t numBits = sizeof(uint64_t);
+    uint32_t cacheLineSize = system->cacheLineSize();
+    //Get cache way num
+    uint32_t cacheWaySize  = getWayAllocationMax();
+    uint32_t cacheSetSize  = cacheWaySize * blkSize;
+    uint32_t dumpcache_addr= 0;
+    str += csprintf("\tsize%d blksize %d cacheLineSize %d cacheWay %d cacheSet %d\n",size, blkSize, cacheLineSize,cacheWaySize,cacheSetSize);
+
+    for (size_t i = 0; i < cacheSetSize; i++) {     //traverse address
+        // Find a blk block based on set and way
+        // ReplaceableEntry *entries = findBlockBySetAndWay(i/cacheLineSize, 1);
+        // CacheBlk* blkw = static_cast<CacheBlk*>(entries);
+        // str += csprintf("find blk set %d way %d ",blkw->getSet(),blkw->getWay());
+        for (size_t j = 0; j < cacheWaySize; j+=1) {   //traverse ways
+            CacheBlk *blk_bk = findVictim(dumpcache_addr, false , cacheLineSize*8 , blk_RP_v ,true);    
+            if (blk_bk->isValid()) {
+
+                //get 64byte data
+                for (size_t f = 0; f < (cacheLineSize/numBits); f++) {
+                    datas += csprintf("%lx ",*(uint64_t *)(blk_bk->data+(numBits*f)));
+                }
+                str += csprintf("\tset:%d\twhy:%d\taddr :0x%16lx\n\t\tdata :0x %s\n",blk_bk->getSet(),blk_bk->getWay(), regenerateBlkAddr(blk_bk)  ,datas);
+               
+                datas.clear();
+                blk_bk->invalidate(); //set unvaild
+            }
+            else {
+                str += csprintf("\tset:%d\twhy:%d\t unvaild \n",blk_bk->getSet(),blk_bk->getWay());
+            }
+        }
+        dumpcache_addr += cacheLineSize;
     }
-    
 
     if (str.empty())
         str = "no valid tags\n";
 
     return str;
 }
+ 
 
 
 

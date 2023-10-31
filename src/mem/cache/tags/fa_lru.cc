@@ -54,7 +54,7 @@
 #include "base/logging.hh"
 #include "mem/cache/base.hh"
 #include "mem/cache/replacement_policies/replaceable_entry.hh"
-
+#include "mem/cache/tags/fa_lru.hh"
 namespace gem5
 {
 
@@ -191,7 +191,7 @@ FALRU::findBlockBySetAndWay(int set, int way) const
 
 CacheBlk*
 FALRU::findVictim(Addr addr, const bool is_secure, const std::size_t size,
-                  std::vector<CacheBlk*>& evict_blks)
+                  std::vector<CacheBlk*>& evict_blks,bool dump_cache)
 {
     // The victim is always stored on the tail for the FALRU
     FALRUBlk* victim = tail;
