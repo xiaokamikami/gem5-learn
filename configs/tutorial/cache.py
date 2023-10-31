@@ -33,6 +33,8 @@ class L1ICache(L1Cache):
             return
         self.size       = options.l1i_size
         self.dump_cache = True if 'L1I' in options.dump_cache else False
+        self.dump_cacheMiss = True if options.observe_cache_miss == 'L1I' else False
+        
     def connectCPU(self, cpu):
         self.cpu_side = cpu.icache_port
 
@@ -46,6 +48,8 @@ class L1DCache(L1Cache):
             return
         self.size = options.l1d_size
         self.dump_cache = True if 'L1D' in options.dump_cache else False
+        self.dump_cacheMiss = True if options.observe_cache_miss == 'L1D' else False
+        
     def connectCPU(self, cpu):
         self.cpu_side = cpu.dcache_port
 
@@ -66,6 +70,8 @@ class L2Cache(Cache):
             return
         self.size = options.l2_size
         self.dump_cache = True if 'L2' in options.dump_cache else False
+        self.dump_cacheMiss = True if options.observe_cache_miss == 'L2' else False
+
     def connectCPUSideBus(self, bus):
         self.cpu_side = bus.mem_side_ports
 
@@ -90,6 +96,8 @@ class L3Cache(Cache):
             return
         self.size = options.l3_size
         self.dump_cache = True if 'L3' in options.dump_cache else False
+        self.dump_cacheMiss = True if options.observe_cache_miss == 'L3' else False
+
     def connectCPUSideBus(self, bus):
 
         self.cpu_side = bus.mem_side_ports

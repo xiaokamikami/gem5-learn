@@ -884,6 +884,10 @@ class BaseCache : public ClockedObject
     const unsigned blkSize;
 
     /**
+     * Print the address at cachemiss
+     */
+    const bool dumpMiss ;
+    /**
      * The latency of tag lookup of a cache. It occurs when there is
      * an access to the cache.
      */
