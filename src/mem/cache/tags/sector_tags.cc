@@ -274,7 +274,7 @@ SectorTags::findBlock(Addr addr, bool is_secure) const
 
 CacheBlk*
 SectorTags::findVictim(Addr addr, const bool is_secure, const std::size_t size,
-                       std::vector<CacheBlk*>& evict_blks)
+                       std::vector<CacheBlk*>& evict_blks ,bool dump_cache=false)
 {
     // Get possible entries to be victimized
     const std::vector<ReplaceableEntry*> sector_entries =
@@ -321,29 +321,6 @@ SectorTags::findVictim(Addr addr, const bool is_secure, const std::size_t size,
 
     return victim;
 }
-void
-SectorTags::findPolicyVictim(Addr addr, const bool is_secure, const std::size_t size,
-                       std::vector<CacheBlk*>& evict_blks){
- // Get possible entries to be victimized
-    const std::vector<ReplaceableEntry*> sector_entries =
-        indexingPolicy->getPossibleEntries(addr);
-
-    // Check if the sector this address belongs to has been allocated
-    Addr tag = extractTag(addr);
-    SectorBlk* victim_sector = static_cast<SectorBlk*>(replacementPolicy->getVictim(
-                                                sector_entries));
-
-    // The whole sector must be evicted to make room for the new sector
-    for (const auto& blk : victim_sector->blks){
-        if (blk->isValid()) {
-            evict_blks.push_back(blk);
-        }
-    }
-    
-  
-}
-
-
 
 
 int

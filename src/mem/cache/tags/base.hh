@@ -59,7 +59,8 @@
 #include "mem/packet.hh"
 #include "params/BaseTags.hh"
 #include "sim/clocked_object.hh"
-
+#include "mem/cache/replacement_policies/base.hh"
+#include "mem/cache/replacement_policies/replaceable_entry.hh"
 namespace gem5
 {
 
@@ -88,6 +89,8 @@ class BaseTags : public ClockedObject
     /** Indexing policy */
     BaseIndexingPolicy *indexingPolicy;
 
+    /** Replacement policy */
+    replacement_policy::Base *replacementPolicy;
     /**
      * The number of tags that need to be touched to meet the warmup
      * percentage.
@@ -276,11 +279,13 @@ class BaseTags : public ClockedObject
      * @param is_secure True if the target memory space is secure.
      * @param size Size, in bits, of new block to allocate.
      * @param evict_blks Cache blocks to be evicted.
+     * @param dump_cache Used as a special implementation of dumpcache.
      * @return Cache block to be replaced.
      */
     virtual CacheBlk* findVictim(Addr addr, const bool is_secure,
                                  const std::size_t size,
-                                 std::vector<CacheBlk*>& evict_blks) = 0;
+                                 std::vector<CacheBlk*>& evict_blks,
+                                 bool dump_cache=false) = 0;
 
     /**
      * Access block and update replacement data. May not succeed, in which case
