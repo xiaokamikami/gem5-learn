@@ -1059,17 +1059,19 @@ InstructionQueue::wakeDependents(const DynInstPtr &completed_inst)
         //Go through the dependency chain, marking the registers as
         //ready within the waiting instructions.
         DynInstPtr dep_inst = dependGraph.pop(dest_reg->flatIndex());
-
-
-        //Print dependent reqnum
-        std::string str;
-        str = csprintf("%d << distance << %d\n",completed_inst->seqNum,dependGraph.getSeqNum(dest_reg->flatIndex()));
-        std::cout << str << std::endl;
+        InstSeqNum startDistance= 0;
 
         while (dep_inst) {
             DPRINTF(IQ, "Waking up a dependent instruction, [sn:%llu] "
                     "PC %s.\n", dep_inst->seqNum, dep_inst->pcState());
-
+            std::string str;
+            //Print dependent reqnum
+            if (dependents==0 ) {
+                startDistance = dep_inst->seqNum;
+                str = csprintf("distance << %d\n",completed_inst->seqNum);
+                std::cout << str << std::endl;      
+            }
+            str = csprintf("%d << distance:%d << %d\n",completed_inst->seqNum ,dep_inst->seqNum - completed_inst->seqNum ,dep_inst->seqNum);
             // Might want to give more information to the instruction
             // so that it knows which of its source registers is
             // ready.  However that would mean that the dependency
@@ -1081,6 +1083,11 @@ InstructionQueue::wakeDependents(const DynInstPtr &completed_inst)
             dep_inst = dependGraph.pop(dest_reg->flatIndex());
 
             ++dependents;
+
+            if(!dep_inst) 
+                str = csprintf("distance >> %d\n",startDistance);
+
+            std::cout << str << std::endl;
         }
 
         // Reset the head node now that all of its dependents have
