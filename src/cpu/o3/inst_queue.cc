@@ -589,6 +589,18 @@ InstructionQueue::insert(const DynInstPtr &new_inst)
 
     --freeEntries;
 
+/*
+     RegIndex src1=0,src2=0,dest=0;
+    if (!new_inst->numDestRegs())
+        dest = new_inst->destRegIdx(0).index();
+    if (!new_inst->numDestRegs())
+        src1 = new_inst->srcRegIdx(0).index();
+    if (new_inst->numDestRegs()==2) {
+        src2 = new_inst->srcRegIdx(1).index();  
+    }
+    dependGraph.findRelyOn(src1,src2,dest,new_inst->seqNum); 
+ */
+
     new_inst->setInIQ();
 
     // Look through its source registers (physical regs), and mark any
@@ -1047,11 +1059,19 @@ InstructionQueue::wakeDependents(const DynInstPtr &completed_inst)
         //Go through the dependency chain, marking the registers as
         //ready within the waiting instructions.
         DynInstPtr dep_inst = dependGraph.pop(dest_reg->flatIndex());
+        InstSeqNum startDistance= 0;
 
         while (dep_inst) {
             DPRINTF(IQ, "Waking up a dependent instruction, [sn:%llu] "
                     "PC %s.\n", dep_inst->seqNum, dep_inst->pcState());
-
+            std::string str;
+            //Print dependent reqnum
+            if (dependents==0 ) {
+                startDistance = dep_inst->seqNum;
+                str = csprintf("distance << %d\n",completed_inst->seqNum);
+                std::cout << str << std::endl;      
+            }
+            str = csprintf("%d << distance:%d << %d\n",completed_inst->seqNum ,dep_inst->seqNum - completed_inst->seqNum ,dep_inst->seqNum);
             // Might want to give more information to the instruction
             // so that it knows which of its source registers is
             // ready.  However that would mean that the dependency
@@ -1063,6 +1083,11 @@ InstructionQueue::wakeDependents(const DynInstPtr &completed_inst)
             dep_inst = dependGraph.pop(dest_reg->flatIndex());
 
             ++dependents;
+
+            if(!dep_inst) 
+                str = csprintf("distance >> %d\n",startDistance);
+
+            std::cout << str << std::endl;
         }
 
         // Reset the head node now that all of its dependents have
@@ -1519,7 +1544,8 @@ InstructionQueue::dumpInsts()
         int num = 0;
         int valid_num = 0;
         ListIt inst_list_it = instList[tid].begin();
-
+        //(*inst_list_it)->seqNum;
+        
         while (inst_list_it != instList[tid].end()) {
             cprintf("Instruction:%i\n", num);
             if (!(*inst_list_it)->isSquashed()) {
