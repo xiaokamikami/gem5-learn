@@ -171,30 +171,28 @@ class BaseSetAssoc : public BaseTags
                         bool dump_cache=false) override
     {
         // Get possible entries to be victimized
-        const std::vector<ReplaceableEntry*> entries =
+        std::vector<ReplaceableEntry*> entries =
             indexingPolicy->getPossibleEntries(addr);
 
-        CacheBlk* victim;
+        CacheBlk* victim = nullptr;
         if (dump_cache==true) {
-/*             for (auto it = entries.begin(); it != entries.end(); it++) {   
-                CacheBlk* blk = static_cast<CacheBlk*>(*it);   
-                if (!blk->isValid())  
-                    it = entries.erase(it);
-            } */
-                for (uint8_t i = 0; i <allocAssoc ; i++) {  //find is vaild blk 
-                    // Choose replacement victim from replacement candidates
-                    victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(
-                                            entries));
-                    // set this blk replacement policies tick  and set unvaild                       
-                    if (victim->isValid()) {
-                        replacementPolicy->reset(victim->replacementData);
-                        break;
-                    }
-                }
-                
+            for (auto it = entries.begin(); it != entries.end(); ) {   //find is vaild blk   
+                CacheBlk* blk = static_cast<CacheBlk*>(*it);     
+                if (!blk->isValid())    
+                    it = entries.erase(it);  
+                else  
+                    ++it;  
+            }
 
-        
-        } else {
+            if (entries.size() > 0) // Choose replacement victim from replacement candidates
+                victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(entries));
+
+                // set this blk replacement policies tick  @bug This method does not work for all replacement policies                     
+                // if (victim->isValid()) {
+                //     replacementPolicy->reset(victim->replacementData); 
+                // }
+        } 
+        else {
             // Choose replacement victim from replacement candidates
             victim = static_cast<CacheBlk*>(replacementPolicy->getVictim(
                                     entries));

@@ -237,8 +237,7 @@ BaseTags::print_use()
         // str += csprintf("find blk set %d way %d ",blkw->getSet(),blkw->getWay());
         for (size_t j = 0; j < cacheWaySize; j+=1) {   //traverse ways
             CacheBlk *blk_bk = findVictim(dumpcache_addr, false , cacheLineSize*8 , blk_RP_v ,true);    
-            if (blk_bk->isValid()) {
-
+            if (blk_bk!=nullptr) {
                 //get 64byte data
                 for (size_t f = 0; f < (cacheLineSize/numBits); f++) {
                     datas += csprintf("%lx ",*(uint64_t *)(blk_bk->data+(numBits*f)));
@@ -247,9 +246,6 @@ BaseTags::print_use()
                
                 datas.clear();
                 blk_bk->invalidate(); //set unvaild
-            }
-            else {
-                str += csprintf("\tset:%d\twhy:%d\t unvaild \n",blk_bk->getSet(),blk_bk->getWay());
             }
         }
         dumpcache_addr += cacheLineSize;
